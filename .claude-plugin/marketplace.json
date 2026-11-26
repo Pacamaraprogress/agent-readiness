@@ -1,0 +1,29 @@
+{
+  "name": "agent-readiness",
+  "owner": {
+    "name": "Omer Evrey",
+    "url": "https://github.com/Pacamaraprogress"
+  },
+  "metadata": {
+    "description": "The agent-readiness skill: audit and fix how ready a website is for AI agents."
+  },
+  "plugins": [
+    {
+      "name": "agent-readiness",
+      "source": "./",
+      "version": "2026.11.26",
+      "description": "Audit and fix how ready a website is for AI agents and AI crawlers: Cloudflare's 24 Agent Readiness checks and levels, per-bot robots.txt verdicts, priority-page checks, fix templates, and a dependency-free Python checker. Framed inside Aleyda Solis's AI Search Optimization Checklist.",
+      "license": "MIT",
+      "keywords": [
+        "agent-readiness",
+        "ai-agents",
+        "ai-crawlers",
+        "robots-txt",
+        "content-signals",
+        "markdown-for-agents",
+        "mcp",
+        "cloudflare"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "check-stock",
+      "type": "skill-md",
+      "description": "Check product stock and lead times with the Example API. Use when a user asks whether an item is available.",
+      "url": "/.well-known/agent-skills/check-stock/SKILL.md",
+      "digest": "sha256:REPLACE_WITH_SHA256_OF_THE_SKILL_MD_FILE"
+    }
+  ]
+}

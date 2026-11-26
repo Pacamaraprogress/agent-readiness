@@ -1,0 +1,48 @@
+# robots.txt template (agent-readiness)
+# Replace example.com, the private paths and the Content-Signal values.
+# Decide three things with the site owner first:
+#   1. Search and AI answers: usually allowed, or the site drops out of them.
+#   2. User-triggered fetchers (ChatGPT-User, Claude-User, Perplexity-User):
+#      usually allowed; some say robots.txt may not apply to them anyway.
+#   3. Training: the owner's policy choice.
+#
+# Matching rules (RFC 9309): a crawler obeys only the most specific group that
+# names it. A named group replaces the * group for that bot, so repeat every
+# private-path Disallow line in it if the group allows anything.
+
+User-agent: *
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /my-account/
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+
+# Content Signals (contentsignals.org, IETF draft): a usage policy, not a block.
+#   search   = search index, links and short excerpts (not AI summaries)
+#   ai-input = use in AI answers at query time (RAG, grounding)
+#   ai-train = training or fine-tuning models
+# A path in front scopes a line, e.g.
+# Content-Signal: /research/ search=yes, ai-input=no, ai-train=no
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+
+# Opt out of AI training while staying in AI search and user requests.
+# Delete this group (and set ai-train=yes above) to allow training.
+# Google-Extended and Applebot-Extended are control tokens, not crawlers.
+# Google-Extended also covers grounding in Google's generative AI products
+# outside Search; leave it out if the owner wants to appear there.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: CCBot
+User-agent: Meta-ExternalAgent
+User-agent: Bytespider
+User-agent: MistralAI-Training
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Disallow: /
+
+# Search and answer bots follow the * group above unless you name them:
+# OAI-SearchBot, Claude-SearchBot, PerplexityBot, Googlebot, Bingbot,
+# Applebot, Meta-WebIndexer, Amzn-SearchBot, MistralAI-Index, DuckAssistBot.
+# Blocking one of them removes the site from that assistant's answers.
+
+Sitemap: https://example.com/sitemap.xml

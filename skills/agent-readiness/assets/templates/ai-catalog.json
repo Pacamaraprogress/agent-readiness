@@ -1,0 +1,15 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Example",
+    "identifier": "did:web:example.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:example.com:mcp:catalog",
+      "displayName": "Example Catalog MCP server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://example.com/mcp/server-card"
+    }
+  ]
+}
