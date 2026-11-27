@@ -1,15 +1,17 @@
 {
-  "specVersion": "1.0",
-  "host": {
-    "displayName": "Example",
-    "identifier": "did:web:example.com"
-  },
+  "specVersion": "0.9",
+  "host": { "displayName": "Example", "identifier": "did:web:example.com" },
   "entries": [
     {
       "identifier": "urn:air:example.com:mcp:catalog",
       "displayName": "Example Catalog MCP server",
       "type": "application/mcp-server-card+json",
-      "url": "https://example.com/mcp/server-card"
+      "url": "https://example.com/mcp/server-card",
+      "description": "Search the Example product catalog and check stock.",
+      "representativeQueries": [
+        "is this product in stock",
+        "find a product by name and show its price"
+      ]
     }
   ]
 }

@@ -192,7 +192,7 @@ Sitemap: {origin}/sitemap.xml
         "skills": [{"name": "check-stock", "type": "skill-md", "description": "Check stock.",
                     "url": "/.well-known/agent-skills/check-stock/SKILL.md",
                     "digest": "sha256:" + hashlib.sha256(SKILL_MD).hexdigest()}]}).replace("{", "{{").replace("}", "}}")),
-    "/.well-known/ai-catalog.json": ("application/ai-catalog+json", """{{"specVersion":"1.0","entries":[
+    "/.well-known/ai-catalog.json": ("application/ai-catalog+json", """{{"specVersion":"0.9","entries":[
 {{"identifier":"urn:air:example.com:mcp:catalog","type":"application/mcp-server-card+json",
 "url":"/mcp/server-card"}}]}}"""),
     "/mcp/server-card": ("application/mcp-server-card+json", '{{"name":"com.example/catalog","version":"1.0.0"}}'),

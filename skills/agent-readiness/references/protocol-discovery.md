@@ -69,39 +69,58 @@ A site that follows the spec fails `mcpServerCard`. Recommendation: serve the ca
 
 ## AI Catalog and ARD: the site-wide list
 
-A server card describes one server. A catalog lists everything a domain offers agents: server cards, A2A agent cards, skills, nested catalogs. Two specs describe the same list and disagree on names:
+A server card describes one server. A catalog lists everything a domain offers agents: server cards, A2A agent cards, skills, nested catalogs. Two specs describe the same list and disagree on names and on one required field:
 
 | | AI Catalog | ARD (Agentic Resource Discovery) |
 |---|---|---|
-| Version (checked 26 Nov 2026) | v0.9, release candidate for 1.0, dated 19 Nov 2026 | v0.91, "Proposal", dated 26 Aug 2026 |
+| Version | v0.9, release candidate for 1.0, dated 19 Nov 2026 (checked 26 Nov 2026) | v0.91, "Proposal", dated 26 Aug 2026; the page was edited on 11 Nov 2026 without a new version number (checked 27 Nov 2026) |
 | Well-known path | `/.well-known/ai-catalog.json` | `/.well-known/ard.json` (calls `ai-catalog.json` its predecessor) |
 | Link relation | `ai-catalog` (HTML `<link>` or HTTP `Link`) | `ard` |
-| Other routes | none in the spec | robots.txt `Agentmap:` line, DNS (`_entries._agents`, `_search._agents`), JSON-LD in pages |
+| Other routes | none in the spec | robots.txt `Agentmap:` line; DNS service-binding records (`_entries._agents` for entries, `_search._agents` for a registry); entry JSON-LD inside an ordinary web page, which registries must crawl |
+| Top level | `specVersion` (required; `"0.9"` for this release candidate) and `entries` | `entries`; other top-level members are ignored |
 | Required per entry | `identifier`, `type`, exactly one of `url` or `data` | the same, plus `displayName` |
 | Media type | `application/ai-catalog+json` | the same type for nested catalogs |
 
 Cloudflare's `ard` check reads the AI Catalog names: an `Agentmap:` line, `<link rel="ai-catalog">`, `/.well-known/ai-catalog.json`, or DNS (`_catalog._agents` TXT). It needs a non-empty `specVersion` string and a non-empty `entries` array, and reports problems in single entries without failing.
 
-**What to publish:** one file, served at both well-known paths, with `displayName` on every entry so it satisfies both specs:
+**The entry.** `identifier` is `urn:air:<your domain>:[<namespace>:]<name>`, `type` is a media type, and exactly one of `url` (a link to the artifact) or `data` (the artifact inline). ARD adds two discovery terms:
+
+- `representativeQueries` (SHOULD, 2 to 5): questions a user might ask that this resource answers. An ARD registry builds its search index from them, so an entry without them still validates but will not be found. ARD's conformance tool reports it as a warning, not a failure.
+- `capabilities` (MAY): short tool names such as `"ProductSearch"`, for filtering without fetching the artifact.
+
+Optional in both: `description`, `tags`, `version`, `updatedAt`, `metadata`. ARD's `trustManifest` carries identity, attestations and signatures; its identity must belong to the domain in the `identifier`, which stops one site from listing entries under another's name.
+
+**ARD entries are JSON-LD (since the 11 Nov 2026 edit).** Consumers read every entry against a base context, `https://agenticresourcediscovery.org/context/v1`, so a plain entry without `@context` stays valid. Add `"@context": "https://agenticresourcediscovery.org/context/v1"` when the entry sits inside a web page, where general JSON-LD tools may read it. An entry may also add terms from its own namespace (for example `"acme:region"` with `"acme"` bound in `@context`), and ARD registries can filter on them. AI Catalog allows members it does not define, so these extra terms do not break the AI Catalog file.
+
+**Entry types.** `type` is an open media type: ARD accepts any valid one. The recognized types are MCP server cards (`application/mcp-server-card+json`), A2A agent cards (`application/a2a-agent-card+json`), generic agent cards (`application/agent-card+json`), agent skills (`application/agent-skills+json`, `+md`, `+zip`, `+gzip`), agent plugins (`application/agent-plugins+zip`, `+gzip`), ARD registries (`application/ai-registry+json`) and nested catalogs (`application/ai-catalog+json`). None of them is for WebMCP tools or ordinary pages. A made-up type would pass validation, but no client or registry would know what to do with it.
+
+**The `displayName` conflict.** AI Catalog says to leave `displayName` out when the artifact carries its own name (the `title` of an MCP server card, the `name` of an A2A agent card), and when it is there it wins over the card. ARD requires it. One file can satisfy both: include `displayName`, set it to exactly the card's title, and change both together.
+
+**What to publish:** one file, served at both well-known paths, that satisfies both specs:
 
 ```json
 {
-  "specVersion": "1.0",
+  "specVersion": "0.9",
   "host": { "displayName": "Example", "identifier": "did:web:example.com" },
   "entries": [
     {
       "identifier": "urn:air:example.com:mcp:catalog",
       "displayName": "Example Catalog MCP server",
       "type": "application/mcp-server-card+json",
-      "url": "https://example.com/mcp/server-card"
+      "url": "https://example.com/mcp/server-card",
+      "description": "Search the Example product catalog and check stock.",
+      "representativeQueries": [
+        "is this product in stock",
+        "find a product by name and show its price"
+      ]
     }
   ]
 }
 ```
 
-- `specVersion` is the AI Catalog data-model version, not the ARD document version.
-- Identifiers use `urn:air:<your domain>:<namespace>:<name>`.
-- Entry types in use: `application/mcp-server-card+json`, `application/a2a-agent-card+json`, `application/agent-skills+json` and related skill types, `application/ai-catalog+json`. There is no type for WebMCP tools or for ordinary pages.
+- `specVersion` is the AI Catalog version: `"0.9"` while v0.9 is the release candidate. The spec says v0.9 is not an alias for 1.0, and a consumer may reject a major version it does not support, so do not write `"1.0"` before v1.0 is published. ARD ignores this member. Release 2026.11.26 of this skill wrote `"1.0"`; correct files made from it.
+- ARD now says a publisher needs only `ard.json` and `rel="ard"`. The scanner and MCP's server-card text read the AI Catalog names, so serve the same file at both paths anyway.
+- **Check it:** ARD's conformance tool (`conformance/bin/conformance-test` in [ards-project/ard-spec](https://github.com/ards-project/ard-spec)) validates a manifest, or takes a domain, fetches `/.well-known/ard.json` (falling back to `ai-catalog.json` with a warning) and validates what it finds. To check one entry against the schema: `npx ajv-cli validate -s spec/schemas/ard-entry.schema.json -d entry.json`, run from a clone of that repository.
 - An empty catalog published to turn a check green helps nobody. Lighthouse's agentic-browsing audits show "Not applicable" when the file is absent.
 
 Template: `assets/templates/ai-catalog.json`.
@@ -191,6 +210,8 @@ Who it suits: SaaS products, data sources and large catalogues whose users alrea
 - Publishing a catalog, skills index or card for something that does not exist or does not work.
 - Pointing `service-desc` at Swagger UI instead of the OpenAPI file.
 - Only one MCP card location: the scanner and spec-following clients look in different places.
+- `"specVersion": "1.0"` in the catalog. AI Catalog v0.9 is a release candidate and asks for `"0.9"`.
+- A catalog entry without `displayName`. AI Catalog allows it, but ARD requires it, so the same file fails ARD validation.
 - A skills index whose digests no longer match the files.
 - OAuth metadata on the identity provider's domain only, with no protected resource metadata on the API's domain.
 - Testing an MCP server only from your own machine.
@@ -200,7 +221,7 @@ Who it suits: SaaS products, data sources and large catalogues whose users alrea
 - [RFC 9727, api-catalog](https://www.rfc-editor.org/rfc/rfc9727) and [RFC 9264, linkset](https://www.rfc-editor.org/rfc/rfc9264)
 - [SEP-2127, MCP Server Cards](https://modelcontextprotocol.io/seps/2127-mcp-server-cards), [ext-server-card repository](https://github.com/modelcontextprotocol/ext-server-card) and its [discovery text](https://github.com/modelcontextprotocol/ext-server-card/blob/main/docs/discovery.md)
 - [AI Catalog specification](https://ai-catalog.io/spec/) and [repository](https://github.com/Agent-Card/ai-catalog)
-- [ARD specification](https://agenticresourcediscovery.org/spec/)
+- [ARD specification](https://agenticresourcediscovery.org/spec/) and [repository](https://github.com/ards-project/ard-spec) (entry schema, OpenAPI for registries, conformance tool)
 - [Agent Skills Discovery RFC](https://github.com/cloudflare/agent-skills-discovery-rfc)
 - [A2A protocol specification](https://a2a-protocol.org/latest/specification/) and [agent discovery](https://a2a-protocol.org/latest/topics/agent-discovery/)
 - [RFC 8414, OAuth authorization server metadata](https://www.rfc-editor.org/rfc/rfc8414) and [RFC 9728, protected resource metadata](https://www.rfc-editor.org/rfc/rfc9728)

@@ -11,7 +11,7 @@
     {
       "name": "agent-readiness",
       "source": "./",
-      "version": "2026.11.26",
+      "version": "2026.11.27",
       "description": "Audit and fix how ready a website is for AI agents and AI crawlers: Cloudflare's 24 Agent Readiness checks and levels, per-bot robots.txt verdicts, priority-page checks, fix templates, and a dependency-free Python checker. Framed inside Aleyda Solis's AI Search Optimization Checklist.",
       "license": "MIT",
       "keywords": [
