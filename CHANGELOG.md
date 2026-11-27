@@ -2,6 +2,12 @@
 
 Each entry matches a [GitHub release](https://github.com/Pacamaraprogress/agent-readiness/releases), whose `agent-readiness.zip` is the file to upload to claude.ai or Claude Desktop.
 
+## 2026.11.28
+
+Released on 27 November 2026; the version number moves past the day because 2026.11.27 was already taken.
+
+- `protocol-discovery.md`: new note on what Lighthouse checks, read from its source. Lighthouse 13.5.0 titles the audit "`ai-catalog.json` schema is valid" and reads only `/.well-known/ai-catalog.json` and `rel="ai-catalog"`. Lighthouse 13.6.0 titles it "ARD manifest is valid", reads `/.well-known/ard.json`, `rel="ard"` and the robots.txt `Agentmap:` line, and marks the `ai-catalog` locations as legacy. In both, "Not applicable" (no file, nothing pointing to one) counts as a pass. Different tools still run different versions, which is one more reason to serve the same catalog at both paths.
+
 ## 2026.11.27
 
 AI Catalog and ARD, checked against both specs and ARD's JSON schema on 27 November 2026.

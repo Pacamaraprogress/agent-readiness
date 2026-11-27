@@ -44,7 +44,7 @@ import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from html.parser import HTMLParser
 
-VERSION = "2026.11.27"
+VERSION = "2026.11.28"
 DEFAULT_UA = ("agent-readiness-check/%s (+https://github.com/Pacamaraprogress/agent-readiness)"
               % VERSION)
 MAX_BYTES = 5 * 1024 * 1024

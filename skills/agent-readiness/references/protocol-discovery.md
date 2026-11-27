@@ -83,6 +83,14 @@ A server card describes one server. A catalog lists everything a domain offers a
 
 Cloudflare's `ard` check reads the AI Catalog names: an `Agentmap:` line, `<link rel="ai-catalog">`, `/.well-known/ai-catalog.json`, or DNS (`_catalog._agents` TXT). It needs a non-empty `specVersion` string and a non-empty `entries` array, and reports problems in single entries without failing.
 
+**Lighthouse** (checked in its source, 27 Nov 2026) runs one audit, `ard-schema`, in its "Agentic browsing" category, but the versions look in different places:
+
+- 13.5.0 (17 Sep 2026) titles it "`ai-catalog.json` schema is valid" and reads only the AI Catalog names: `/.well-known/ai-catalog.json`, `<link rel="ai-catalog">` or a `Link` header with that relation.
+- 13.6.0 (27 Oct 2026) titles it "ARD manifest is valid" and follows ARD: `/.well-known/ard.json`, `rel="ard"` (tag or header), or an `Agentmap:` line in robots.txt. It still reads the `ai-catalog` locations but marks them as legacy.
+- In both, no file and nothing pointing to one means "Not applicable". That counts as a pass, so it does not lower the category score.
+
+Which tool runs which version varies (PageSpeed Insights showed the 13.6 title on 11 Nov 2026; a report captured on 27 Nov 2026 still ran 13.5.0), so a site with something to list serves the same file at both paths.
+
 **The entry.** `identifier` is `urn:air:<your domain>:[<namespace>:]<name>`, `type` is a media type, and exactly one of `url` (a link to the artifact) or `data` (the artifact inline). ARD adds two discovery terms:
 
 - `representativeQueries` (SHOULD, 2 to 5): questions a user might ask that this resource answers. An ARD registry builds its search index from them, so an entry without them still validates but will not be found. ARD's conformance tool reports it as a warning, not a failure.
@@ -119,7 +127,7 @@ Optional in both: `description`, `tags`, `version`, `updatedAt`, `metadata`. ARD
 ```
 
 - `specVersion` is the AI Catalog version: `"0.9"` while v0.9 is the release candidate. The spec says v0.9 is not an alias for 1.0, and a consumer may reject a major version it does not support, so do not write `"1.0"` before v1.0 is published. ARD ignores this member. Release 2026.11.26 of this skill wrote `"1.0"`; correct files made from it.
-- ARD now says a publisher needs only `ard.json` and `rel="ard"`. The scanner and MCP's server-card text read the AI Catalog names, so serve the same file at both paths anyway.
+- ARD now says a publisher needs only `ard.json` and `rel="ard"`. The scanner, MCP's server-card text and Lighthouse 13.5.0 read the AI Catalog names, so serve the same file at both paths anyway.
 - **Check it:** ARD's conformance tool (`conformance/bin/conformance-test` in [ards-project/ard-spec](https://github.com/ards-project/ard-spec)) validates a manifest, or takes a domain, fetches `/.well-known/ard.json` (falling back to `ai-catalog.json` with a warning) and validates what it finds. To check one entry against the schema: `npx ajv-cli validate -s spec/schemas/ard-entry.schema.json -d entry.json`, run from a clone of that repository.
 - An empty catalog published to turn a check green helps nobody. Lighthouse's agentic-browsing audits show "Not applicable" when the file is absent.
 
